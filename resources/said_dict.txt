@@ -1,0 +1,54 @@
+accused	acknowledged	added	addressed	admitted
+advised	affirmed	agreed	announced	answered
+apologized	approved	argued	asked	asserted
+assured	avowed	babbled	badgered	barked
+bawled	beamed	began	begged	bellowed
+bet	bickered	bleated	blurted	boasted
+boomed	bragged	breathed	broke in	bubbled
+bugged	burst out	cackled	called	cautioned
+chatted	chattered	cheered	chided	chimed in
+chirped	chittered	choked	chortled	chorused
+chuckled	claimed	clarified	clucked	coaxed
+commanded	commented	complained	conceded	concluded
+confessed	confided	confirmed	congratulated	continued
+convinced	cooed	corrected	coughed	countered
+cried	croaked	crowed	cursed	dared
+decided	declared	demanded	demurred	denied
+described	disagreed	disclosed	divulged	doubted
+drawled	dribbled	echoed	encouraged	ended
+exasperated	exclaimed	explained	exploded	finished
+fretted	gasped	gawked	gently	gibed
+giggled	gloated	greeted	grimaced	groaned
+growled	grunted	grumbled	guessed	gulped
+gurgled	gushed	hinted	hissed	hollered
+howled	huffed	hummed	hypothesized	imitated
+implied	informed	inquired	insisted	interjected
+interrupted	intoned	jeered	jested	jibed
+joked	laughed	lectured	lied	lisped
+maintained	marveled	mentioned	mimicked	moaned
+mocked	motioned	mumbled	murmured	mused
+muttered	nagged	nodded	noted	notified
+objected	observed	offered	opined	ordered
+panted	perplexed	pestered	piped	pleaded
+pled	pointed out	pondered	praised	prayed
+proclaimed	promised	proposed	protested	provoked
+purred	put in	puzzled	quavered	queried
+questioned	quietly	quipped	quizzed	quoted
+raged	ranted	reasoned	reassured	recalled
+reckoned	recounted	reiterated	related	remarked
+remembered	reminded	repeated	replied	reported
+requested	resounded	responded	retaliated	retorted
+revealed	roared	said	sang	sassed	screamed
+scoffed	scolded	shot	shouted	shrieked
+shrilled	sighed	simpered	slurred	smiled
+smirked	snapped	snarled	sneered	sneezed
+snickered	sniffed	sniffled	snorted	sobbed
+spat	speculated	spluttered	spoke	sputtered
+squeaked	squealed	stammered	started	stated
+stormed	stressed	stuttered	suggested	surmised
+taunted	teased	tempted	tested	thanked
+theorized	threatened	told	trilled	urged
+uttered	volunteered	vowed	wailed	warned
+went on	wept	wheezed	whimpered	whined
+whispered	wondered	worried	yawned	yakked
+yelled
