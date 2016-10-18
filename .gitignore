@@ -1,3 +1,7 @@
+# Directories to ignore
 data/*
 book-nlp/
 core-nlp/
+
+# Files to ignore
+*.pyc
