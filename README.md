@@ -1,9 +1,9 @@
 Requirements:
 -------
-> - Python 2.x
-> - Java 1.8 or higher (required for coreNLP and bookNLP)
-> - LIWC (not free) is required for calculating the LIWC features.
-> - See python_packages.txt for an extensive list of required python libraries.
+- Python 2.x
+- Java 1.8 or higher (required for coreNLP and bookNLP)
+- LIWC (not free) is required for calculating the LIWC features.
+- See python_packages.txt for an extensive list of required python libraries.
 	Note that many of these libraries are required only for specific scripts.
 
 
@@ -26,16 +26,13 @@ running characterization scripts.
 Go into the scripts directory and run the following:
 
 parse_characters.py
-e.g.:
-	python parse_characters.py 1
+> python parse_characters.py 1
 
 ident_aliases.py
-e.g.:
-	python ident_aliases.py character 1
+> python ident_aliases.py character 1
 
 parse_collocates.py
-e.g.:
-	python parse_collocates.py character 1
+> python parse_collocates.py character 1
 
 
 At this point you should be able to run many of the calc scripts (for example, calc_concreteness.py).
@@ -48,17 +45,17 @@ If you have any questions or concerns at all, please contact hardik.vala@mail.mc
 
 KNOWN ISSUES:
 -------
-> - Preliminary setup with coreNLP and bookNLP needs to be made more straightfoward and easy to understand
-> - Initial code had functionality for parsing sub-copora as well as single works, but this has been commented
+- Preliminary setup with coreNLP and bookNLP needs to be made more straightfoward and easy to understand
+- Initial code had functionality for parsing sub-copora as well as single works, but this has been commented
 	out due to its reliance on hardcoding.
-> - Publication date is always 0 due to the original code hardcoding the publication date for each individual
+- Publication date is always 0 due to the original code hardcoding the publication date for each individual
 	work. This date will have to be provided for each work through some additional metadata file perhaps.
-> - Various scripts require certain other scripts to be run first, and will often quietly fail if run out of
+- Various scripts require certain other scripts to be run first, and will often quietly fail if run out of
 	order. Better feedback needs to be provided.
 
 Credits:
 -------
-> - Original code by Hardik Vala
-> - (Some) cleanup by Robert Budac
-> - Harry Potter and the Chamber of Secrets excerpt copied from:
+- Original code by Hardik Vala
+- (Some) cleanup by Robert Budac
+- Harry Potter and the Chamber of Secrets excerpt copied from:
 https://www.bookbrowse.com/excerpts/index.cfm/book_number/453/Harry-Potter-and-The-Chamber-of-Secrets
