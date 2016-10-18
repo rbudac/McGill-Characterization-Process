@@ -1,7 +1,7 @@
 Requirements:
 -------
 - Python 2.x
-- Java 1.8 or higher (required for coreNLP and bookNLP)
+- Java 1.8 or higher (required for CoreNLP and BookNLP)
 - LIWC (not free) is required for calculating the LIWC features.
 - See python_packages.txt for an extensive list of required python libraries.
 	Note that many of these libraries are required only for specific scripts.
@@ -13,11 +13,15 @@ First, change the path in the datapath.txt file, so that it points to the exact 
 This directory will contain all of your texts, each in their own directory. (See the harry-potter excerpt,
 which has been provided as an example.)
 
-If you want to do your own texts, note that they will need to be run through coreNLP and bookNLP first.
+If you want to do your own texts, note that they will need to be run through CoreNLP and BookNLP first.
+
+- BookNLP: https://github.com/dbamman/book-nlp
+- Core-NLP: http://stanfordnlp.github.io/CoreNLP/
+
 Download here, and check the "booknlp-corenlp-prep" directory in the scripts directory, for some guidance
 as to what command line parameters to include. Note, these are kind've messy at the moment. Apologies!
 
-Once you have the output from coreNLP and bookNLP, put that output in the same directory structure as
+Once you have the output from CoreNLP and BookNLP, put that output in the same directory structure as
 harry-potter has, with the original text itself being in a "texts" directory.
 
 With all the texts that you wish to analyze, in the data directory and properly organized, you can start
