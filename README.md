@@ -26,14 +26,17 @@ running characterization scripts.
 Go into the scripts directory and run the following:
 
 parse_characters.py
-> python parse_characters.py 1
-
+...
+python parse_characters.py 1
+...
 ident_aliases.py
-> python ident_aliases.py character 1
-
+...
+python ident_aliases.py character 1
+...
 parse_collocates.py
-> python parse_collocates.py character 1
-
+...
+python parse_collocates.py character 1
+...
 
 At this point you should be able to run many of the calc scripts (for example, calc_concreteness.py).
 Most of them will require you to specify an output directory that is different from your data directory
