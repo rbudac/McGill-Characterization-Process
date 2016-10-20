@@ -2,6 +2,7 @@
 data/*
 book-nlp/
 core-nlp/
+out/
 
 # Files to ignore
 *.pyc

@@ -12,13 +12,9 @@ import sys
 def GetDataPath():
 	file = open('../datapath.txt', 'r')
 	return file.readline().strip('\n')
-#	raise NotImplementedError
 
 # Data directory path.
 DATA_DIRPATH = GetDataPath() 
-
-
-#"/home/ubuntu/work/ra/noveltm/characterization/data"
 
 
 class StoryManager(object):
@@ -105,6 +101,672 @@ class StoryManager(object):
 		"""
 
 		return os.path.exists(self.corenlp_fpath)
+
+
+class SubCorpusManager(object):
+	"""
+	Manages the base files (text, CoreNLP .xml, and BookNLP .html) for a
+	sub-corpus.
+	"""
+
+	# Inititalizes the manager with the given root, BookNLP, CoreNLP, and text
+	# directory paths. If not specified, then the paths are initialized to
+	# defaults (except for the root directory path).
+	def __init__(self, dirpath, booknlp_dirpath=None, corenlp_dirpath=None,
+		text_dirpaths=None):
+		self.dirpath = dirpath
+		self.booknlp_dirpath = (os.path.join(self.dirpath, 'booknlp')
+			if booknlp_dirpath is None else booknlp_dirpath)
+		self.corenlp_dirpath = (os.path.join(self.dirpath, 'corenlp')
+			if corenlp_dirpath is None else corenlp_dirpath)
+		self.text_dirpaths = ([os.path.join(os.path.join(self.dirpath, 'texts'), 
+			'orig')] if text_dirpaths is None else text_dirpaths)
+
+	def get_ids(self, origin):
+		"""
+		Returns a list of sub-corpus story Id's.
+
+		@param origin - If origin is 'all', 'gen', or 'novels', then all the
+			Id's, the Id's corresponding to stories for which the CoreNLP .xml
+			and BookNLP files have been generated, or only the novel Id's (if
+			applicable) are returned, respectively
+		@return List of story Id's in sub-corpus, in alphabetical order
+		"""
+
+		if origin == 'all':
+			raise NotImplementedError
+		elif origin == 'gen':
+			bids, cids = [], []
+
+			for parent, subdirnames, fnames in os.walk(self.booknlp_dirpath):
+				for fname in fnames:
+					if fname.endswith('.html'):
+						bids.append(os.path.basename(parent))
+
+			for fname in os.listdir(self.corenlp_dirpath):
+				if fname.endswith('.xml'):
+					cids.append(fname.split('.')[0])
+
+			return sorted(set(bids) & set(cids))
+		elif origin == 'novels':
+			raise NotImplementedError
+		else:
+			raise ValueError("'origin' argument must be 'all', 'gen', or "
+				"'novels'.")
+
+	def get_dates(self):
+		"""
+		Returns the publication dates for all stories in the sub-corpus.
+
+		@return Map from story Id to publication date (as an integer)
+		"""
+
+		raise NotImplementedError
+
+	def get_wcs(self):
+		"""
+		Returns the word counts for all stories in the sub-corpus.
+
+		@return Map from story Id to word count
+		"""
+
+		wcs = {}
+		for path in self.get_text_paths():
+			fname = os.path.basename(path)
+
+			with open(path) as f:
+				wcs[fname[:-4]] = len(f.read().split())
+
+		return wcs
+
+	def get_booknlp_fpath(self, sid):
+		"""
+		Returns the filepath to the BookNLP .html for the given story.
+
+		@param sid - Story Id of story
+		@return Filepath to BookNLP .html
+		"""
+
+		return os.path.join(os.path.join(self.booknlp_dirpath, sid),
+			'book.id.html')
+
+	def get_booknlp_tokens(self, sid):
+		"""
+		Returns the filepath to the BookNLP .tokens for the given story.
+
+		@param sid - Story Id of story
+		@return Filepath to BookNLP .tokens
+		"""
+
+		booknlp_dirpath = os.path.dirname(self.get_booknlp_fpath(sid))
+		# Path to BookNLP tokens file, assumed to be in the BookNLP directory.
+		return os.path.join(booknlp_dirpath, 'tokens')
+
+	def get_corenlp_fpath(self, sid):
+		"""
+		Returns the filepath to the CoreNLP .xml for the given story.
+
+		@param sid - Story Id of story
+		@return Filepath to CoreNLP .xml
+		"""
+
+		return os.path.join(self.corenlp_dirpath, sid + '.xml')
+
+	def get_text_fpath(self, sid):
+		"""
+		Returns the filepath to the text for the given story.
+
+		@param sid - Story Id of story
+		@return Filepath to text (None if story doesn't belong to sub-corpus)
+		"""
+
+		fname = sid + '.txt'
+
+		for dirpath in self.text_dirpaths:
+			path = os.path.join(dirpath, fname)
+			if os.path.exists(path):
+				return path
+
+	def get_text_paths(self):
+		"""
+		Returns a generator over all filepaths to text files belonging to the
+		sub-corpus.
+
+		@return Generator of filepaths
+		"""
+
+		for dirpath in self.text_dirpaths:
+			for fname in os.listdir(dirpath):
+				if fname.endswith('.txt'):
+					yield os.path.join(dirpath, fname)
+
+	def belongs(self, sid):
+		"""
+		Checks if the given story Id corresponds to a story in the sub-corpus.
+
+		@param - Story Id of story.
+		@return True if the story belongs to the sub-corpus, False otherwise
+			(Checks if story text exists in sub-corpus).
+		"""
+
+		return (self.get_text_fpath(sid) is not None)
+
+
+class BothTextsMinusShakesCorpusManager(SubCorpusManager):
+	"""
+	Manages the base files (text, CoreNLP .xml, and BookNLP .html) for the
+	BOTH_TEXTS_MINUS_SHAKES corpus.
+	"""
+
+	# Inititalizes the manager with the given root, BookNLP, CoreNLP, and text
+	# directory paths. If not specified, then the paths are initialized to
+	# defaults.
+	def __init__(self, dirpath=None, booknlp_dirpath=None, corenlp_dirpath=None,
+		text_dirpaths=None):
+		
+		if dirpath is None:
+			dirpath = os.path.join(DATA_DIRPATH, 'BOTH_TEXTS_MINUS_SHAKES')
+
+		super(BothTextsMinusShakesCorpusManager, self).__init__(dirpath=dirpath,
+			booknlp_dirpath=booknlp_dirpath, corenlp_dirpath=corenlp_dirpath,
+			text_dirpaths=text_dirpaths)
+
+	def get_dates(self):
+		"""
+		Returns the publication dates for all stories in the sub-corpus.
+
+		@return Map from story Id to publication date (as an integer)
+		"""
+
+		dates = {}
+		for path in self.get_text_paths():
+			fname = os.path.basename(path)
+			try:
+				dates[fname[:-4]] = int(fname[:4])
+			except ValueError:
+				continue
+
+		return dates
+
+
+class ContemporaryCorpusManager(SubCorpusManager):
+	"""
+	Manages the base files (text, CoreNLP .xml, and BookNLP .html) for the
+	Contemporary corpus.
+	"""
+
+	# Sub-corpus is divided into the following sections.
+	SECTIONS = ['bestsellers', 'contemporary-ny-times', 'mystery',
+		'prizewinners', 'romance', 'scifi', 'young-adult-amazon',
+		'young-adult-goodreads']
+
+	# Inititalizes the manager with the given root, BookNLP, CoreNLP, and text
+	# directory paths. If not specified, then the paths are initialized to
+	# defaults.
+	def __init__(self, dirpath=None, booknlp_dirpath=None, corenlp_dirpath=None,
+		text_dirpaths=None):
+		
+		if dirpath is None:
+			dirpath = os.path.join(DATA_DIRPATH, 'contemporary')
+
+		if text_dirpaths is None:
+			text_dirpaths = [os.path.join(os.path.join(os.path.join(dirpath,
+									sec), 'texts'), 'orig')
+								for sec in self.SECTIONS]
+
+		super(ContemporaryCorpusManager, self).__init__(dirpath=dirpath,
+			booknlp_dirpath=booknlp_dirpath, corenlp_dirpath=corenlp_dirpath,
+			text_dirpaths=text_dirpaths)
+
+	def get_dates(self):
+		"""
+		Returns the publication dates for all stories in the sub-corpus.
+
+		@return Map from story Id to publication date (as an integer)
+		"""
+
+		dates = {}
+		for path in self.get_text_paths():
+			fname = os.path.basename(path)
+			dates[fname[:-4]] = int(fname[:4])
+
+		return dates
+
+	def get_genre(self, sid, pretty=False):
+		"""
+		Returns the genre for the given story.
+
+		@param sid - Story Id of story
+		@param pretty - If True, then genre is returned in a more print friendly
+			format (Default is False)
+		@return Genre (as a string)
+		"""
+
+		# Checks the text filepath for particular folders to determine the
+		# genre.
+		text_path = self.get_text_fpath(sid)
+
+		if 'contemporary-ny-times' in text_path:
+			if pretty:
+				return 'NY-Times'
+
+			return 'ny-times'
+
+		if 'young-adult' in text_path:
+			if pretty:
+				return 'Young Adult'
+
+			return 'young-adult'
+
+		for sec in self.SECTIONS:
+			if sec in text_path:
+				if pretty:
+					# Capitalize.
+					return sec[0].upper() + sec[1:]
+
+				return sec
+
+
+class MFACorpusManager(SubCorpusManager):
+	"""
+	Manages the base files (text, CoreNLP .xml, and BookNLP .html) for the
+	MFA corpus.
+	"""
+
+	# Inititalizes the manager with the given root, BookNLP, CoreNLP, and text
+	# directory paths. If not specified, then the paths are initialized to
+	# defaults.
+	def __init__(self, dirpath=None, booknlp_dirpath=None, corenlp_dirpath=None,
+		text_dirpaths=None):
+		
+		if dirpath is None:
+			dirpath = os.path.join(DATA_DIRPATH, 'mfa')
+
+		super(MFACorpusManager, self).__init__(dirpath=dirpath,
+			booknlp_dirpath=booknlp_dirpath, corenlp_dirpath=corenlp_dirpath,
+			text_dirpaths=text_dirpaths)
+
+	def get_dates(self):
+		"""
+		Returns the publication dates for all stories in the sub-corpus.
+
+		@return Map from story Id to publication date (as an integer)
+		"""
+
+		dates = {}
+		for path in self.get_text_paths():
+			fname = os.path.basename(path)
+			dates[fname[:-4]] = int(fname[:4])
+
+		return dates
+
+
+class Nonfiction19CCorpusManager(SubCorpusManager):
+	"""
+	Manages the base files (text, CoreNLP .xml, and BookNLP .html) for the
+	19C non-fiction (English) corpus.
+	"""
+
+	# Inititalizes the manager with the given root, BookNLP, CoreNLP, and text
+	# directory paths. If not specified, then the paths are initialized to
+	# defaults.
+	def __init__(self, dirpath=None, booknlp_dirpath=None, corenlp_dirpath=None,
+		text_dirpaths=None):
+		
+		if dirpath is None:
+			dirpath = os.path.join(DATA_DIRPATH, 'nonnovel-english-19C-history')
+
+		super(Nonfiction19CCorpusManager, self).__init__(dirpath=dirpath,
+			booknlp_dirpath=booknlp_dirpath, corenlp_dirpath=corenlp_dirpath,
+			text_dirpaths=text_dirpaths)
+
+	def get_dates(self):
+		"""
+		Returns the publication dates for all stories in the sub-corpus.
+
+		@return Map from story Id to publication date (as an integer)
+		"""
+
+		dates = {}
+		for path in self.get_text_paths():
+			fname = os.path.basename(path)
+			dates[fname[:-4]] = int(fname[:4])
+
+		return dates
+
+
+class Nonfiction21CCorpusManager(SubCorpusManager):
+	"""
+	Manages the base files (text, CoreNLP .xml, and BookNLP .html) for the
+	21C non-fiction (English) corpus.
+	"""
+
+	# Inititalizes the manager with the given root, BookNLP, CoreNLP, and text
+	# directory paths. If not specified, then the paths are initialized to
+	# defaults.
+	def __init__(self, dirpath=None, booknlp_dirpath=None, corenlp_dirpath=None,
+		text_dirpaths=None):
+		
+		if dirpath is None:
+			dirpath = os.path.join(DATA_DIRPATH,
+				'nonnovel-english-contemporary-mixed')
+
+		super(Nonfiction21CCorpusManager, self).__init__(dirpath=dirpath,
+			booknlp_dirpath=booknlp_dirpath, corenlp_dirpath=corenlp_dirpath,
+			text_dirpaths=text_dirpaths)
+
+	def get_dates(self):
+		"""
+		Returns the publication dates for all stories in the sub-corpus.
+
+		@return Map from story Id to publication date (as an integer)
+		"""
+
+		dates = {}
+		for path in self.get_text_paths():
+			fname = os.path.basename(path)
+			dates[fname[:-4]] = int(fname[:4])
+
+		return dates
+
+
+class NYTimesNoMFACorpusManager(SubCorpusManager):
+	"""
+	Manages the base files (text, CoreNLP .xml, and BookNLP .html) for the
+	NY-Times (No MFA) corpus.
+	"""
+
+	# Inititalizes the manager with the given root, BookNLP, CoreNLP, and text
+	# directory paths. If not specified, then the paths are initialized to
+	# defaults.
+	def __init__(self, dirpath=None, booknlp_dirpath=None, corenlp_dirpath=None,
+		text_dirpaths=None):
+		
+		if dirpath is None:
+			dirpath = os.path.join(DATA_DIRPATH, 'nytimes-no-mfa')
+
+		super(NYTimesNoMFACorpusManager, self).__init__(dirpath=dirpath,
+			booknlp_dirpath=booknlp_dirpath, corenlp_dirpath=corenlp_dirpath,
+			text_dirpaths=text_dirpaths)
+
+	def get_dates(self):
+		"""
+		Returns the publication dates for all stories in the sub-corpus.
+
+		@return Map from story Id to publication date (as an integer)
+		"""
+
+		dates = {}
+		for path in self.get_text_paths():
+			fname = os.path.basename(path)
+			dates[fname[:-4]] = int(fname[:4])
+
+		return dates
+
+
+class PeriodCorpusManager(SubCorpusManager):
+	"""
+	Manages the base files (text, CoreNLP .xml, and BookNLP .html) for the
+	Period Novels corpus.
+	"""
+
+	# Sub-corpus is divided into the following sections.
+	SECTIONS = ['c18', 'rom', 'vic']
+
+	# Inititalizes the manager with the given root, BookNLP, CoreNLP, and text
+	# directory paths. If not specified, then the paths are initialized to
+	# defaults.
+	def __init__(self, dirpath=None, booknlp_dirpath=None, corenlp_dirpath=None,
+		text_dirpaths=None):
+		
+		if dirpath is None:
+			dirpath = os.path.join(DATA_DIRPATH, 'period-novels')
+
+		if text_dirpaths is None:
+			text_dirpaths = [os.path.join(os.path.join(os.path.join(dirpath,
+									sec), 'texts'), 'orig')
+								for sec in self.SECTIONS]
+
+		super(PeriodCorpusManager, self).__init__(dirpath=dirpath,
+			booknlp_dirpath=booknlp_dirpath, corenlp_dirpath=corenlp_dirpath,
+			text_dirpaths=text_dirpaths)
+
+	def get_dates(self):
+		"""
+		Returns the publication dates for all stories in the sub-corpus.
+
+		@return Map from story Id to publication date (as an integer)
+		"""
+
+		dates = {}
+		for path in self.get_text_paths():
+			fname = os.path.basename(path)
+
+			if fname.startswith('Chadwyck'):
+				dates[fname[:-4]] = int(fname[9:13])
+			else:
+				dates[fname[:-4]] = int(fname[:4])
+
+		return dates
+
+	def get_period(self, sid, pretty=False):
+		"""
+		Returns the period ('rom', 'vic', or 'c18') for the given story.
+
+		@param sid - Story Id of story
+		@return Period (as a string)
+		"""
+
+		# Checks the text filepath for particular folders to determine the
+		# period.
+		text_path = self.get_text_fpath(sid)
+
+		for sec in self.SECTIONS:
+			if sec in text_path.split(os.sep):
+				return sec
+
+
+class PiperCorpusManager(SubCorpusManager):
+	"""
+	Manages the base files (text, CoreNLP .xml, and BookNLP .html) for the
+	Piper corpus.
+
+	The files corresponding to a story are traced using the story's id, a
+	positive integer string 8 characters long (Includes leading 0's if
+	necessary).
+	"""
+
+	# Inititalizes the manager with the given root, BookNLP, CoreNLP, and text
+	# directory paths. If not specified, then the paths are initialized to
+	# defaults.
+	def __init__(self, dirpath=None, booknlp_dirpath=None, corenlp_dirpath=None,
+		text_dirpaths=None):
+		
+		if dirpath is None:
+			dirpath = os.path.join(DATA_DIRPATH, 'piper')
+
+		# Path to info .csv file.
+		self.info_path = os.path.join(dirpath, 'novels-info.csv')
+
+		super(PiperCorpusManager, self).__init__(dirpath=dirpath,
+			booknlp_dirpath=booknlp_dirpath, corenlp_dirpath=corenlp_dirpath,
+			text_dirpaths=text_dirpaths)
+
+	def get_ids(self, origin):
+		"""
+		Returns a list of sub-corpus story Id's.
+
+		@param origin - If origin is 'all', 'gen', or 'novels', then all the
+			Id's, the Id's corresponding to stories for which the CoreNLP .xml
+			and BookNLP files have been generated, or only the novel Id's (if
+			applicable) are returned, respectively
+		@return List of story Id's in sub-corpus, in alphabetical order
+		"""
+
+		if origin == 'all':
+			raise NotImplementedError
+		elif origin == 'gen':
+			bids, cids = [], []
+
+			for parent, subdirnames, fnames in os.walk(self.booknlp_dirpath):
+				for fname in fnames:
+					if fname.endswith('.html'):
+						bids.append(os.path.basename(parent))
+
+			for fname in os.listdir(self.corenlp_dirpath):
+				if fname.endswith('.xml'):
+					cids.append(fname.split('.')[0])
+
+			return sorted(set(bids) & set(cids), key=lambda i: int(i))
+		elif origin == 'novels':
+			raise NotImplementedError
+		else:
+			raise ValueError("'origin' argument must be 'all', 'gen', or "
+				"'novels'.")
+
+	def get_dates(self):
+		"""
+		Returns the publication dates for all stories in the sub-corpus.
+
+		@return Map from story Id to publication date (as an integer)
+		"""
+
+		# Converts a raw story Id in the info .csv to the proper Id.
+		def to_sid(raw_id):
+			return '0' * (8 - len(raw_id)) + raw_id
+
+		with open(self.info_path, 'rb') as f:
+			reader = csv.reader(f, delimiter=',', quotechar='"')
+
+			next(reader)
+
+			return {to_sid(row[0]): int(row[-5]) for row in reader}
+
+	def get_wcs(self):
+		"""
+		Returns the word counts for all stories in the sub-corpus.
+
+		@return Map from story Id to word count
+		"""
+
+		# Converts a raw story Id in the info .csv to the proper Id.
+		def to_sid(raw_id):
+			return '0' * (8 - len(raw_id)) + raw_id
+
+		with open(self.info_path, 'rb') as f:
+			reader = csv.reader(f, delimiter=',', quotechar='"')
+
+			next(reader)
+
+			return {to_sid(row[0]): int(row[-1]) for row in reader}
+
+
+class StanfordCorpusManager(SubCorpusManager):
+	"""
+	Manages the base files (text, CoreNLP .xml, and BookNLP .html) for the
+	Stanford corpus.
+	"""
+
+	# Inititalizes the manager with the given root, BookNLP, CoreNLP, and text
+	# directory paths. If not specified, then the paths are initialized to
+	# defaults.
+	def __init__(self, dirpath=None, booknlp_dirpath=None, corenlp_dirpath=None,
+		text_dirpaths=None):
+		
+		if dirpath is None:
+			dirpath = os.path.join(DATA_DIRPATH, '19C-stanford')
+
+		super(StanfordCorpusManager, self).__init__(dirpath=dirpath,
+			booknlp_dirpath=booknlp_dirpath, corenlp_dirpath=corenlp_dirpath,
+			text_dirpaths=text_dirpaths)
+
+	def get_dates(self):
+		"""
+		Returns the publication dates for all stories in the sub-corpus.
+
+		@return Map from story Id to publication date (as an integer)
+		"""
+
+		dates = {}
+		for path in self.get_text_paths():
+			fname = os.path.basename(path)
+			sid = fname[:-4]
+
+			if sid == "InternetArchive_British_n.d_Braddon_Sonsoffire" or \
+				sid == "InternetArchive_British_n.d_Egan_Theflowerof" or \
+				sid == "InternetArchive_British_n.d_Lytton_TheParisians" or \
+				sid == "InternetArchive_British_n.d_Sharowood_T_S_Foraking" or \
+				sid == "InternetArchive_British_Between_1863_and_1878_Ainsworth_Thegoldsmithwife" or \
+				sid == "InternetArchive_British_l865_Ouida_1839_1908_Strathmorea":
+				continue
+			elif sid == "Other_British_ca._1841_Ellis_Familysecretsor":
+				date = "1841"
+			elif sid == "Stanford_British_MDCCCXXXIV_[1834_Martineau_Illustrationsofpolitical":
+				date = "1834"
+			elif sid == "Stanford_British_c1898_Sand_Maupratby":
+				date = "1898"
+			elif sid == "InternetArchive_British_c1893_Blackmore_LornaDoone":
+				date = "1893"
+			elif sid == "InternetArchive_British_1816-1820_Burney_Talesoffancy":
+				date = "1816"
+			else:
+				date = fname.split('_')[2]
+
+			if date:
+				dates[sid] = int(date)
+
+		return dates
+
+
+class WilkensCorpusManager(SubCorpusManager):
+	"""
+	Manages the base files (text, CoreNLP .xml, and BookNLP .html) for the
+	Wilkens corpus.
+	"""
+
+	# Inititalizes the manager with the given root, BookNLP, CoreNLP, and text
+	# directory paths. If not specified, then the paths are initialized to
+	# defaults.
+	def __init__(self, dirpath=None, booknlp_dirpath=None, corenlp_dirpath=None,
+		text_dirpaths=None):
+		
+		if dirpath is None:
+			dirpath = os.path.join(DATA_DIRPATH, 'wilkens')
+
+		# Path to info .csv file.
+		self.info_path = os.path.join(dirpath, 'info.csv')
+
+		super(WilkensCorpusManager, self).__init__(dirpath=dirpath,
+			booknlp_dirpath=booknlp_dirpath, corenlp_dirpath=corenlp_dirpath,
+			text_dirpaths=text_dirpaths)
+
+	def get_dates(self):
+		"""
+		Returns the publication dates for all stories in the sub-corpus.
+
+		@return Map from story Id to publication date (as an integer)
+		"""
+
+		with open(self.info_path, 'rb') as f:
+			reader = csv.reader(f, delimiter=',', quotechar='"')
+
+			next(reader)
+
+			return {row[0]: int(row[9]) for row in reader}
+
+	def get_wcs(self):
+		"""
+		Returns the word counts for all stories in the sub-corpus.
+
+		@return Map from story Id to word count
+		"""
+
+		with open(self.info_path, 'rb') as f:
+			reader = csv.reader(f, delimiter=',', quotechar='"')
+
+			next(reader)
+
+			return {row[0]: int(row[-1]) for row in reader}
 
 
 class CorpusManager(object):
